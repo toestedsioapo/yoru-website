@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>YORU — Late Night Ramen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;700;800&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --black:   #080808;
+  --off:     #0f0f0f;
+  --panel:   #131313;
+  --neon:    #E8FF00;
+  --pink:    #FF2D78;
+  --cyan:    #00F5FF;
+  --white:   #F0F0F0;
+  --muted:   #555;
+  --border:  #222;
+  --ff-h:    'Bebas Neue', Impact, sans-serif;
+  --ff-b:    'Syne', system-ui, sans-serif;
+  --ff-jp:   'Noto Sans JP', sans-serif;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:var(--ff-b);
+  font-weight:400;
+  line-height:1.6;
+  overflow-x:hidden;
+  cursor:crosshair;
+}
+
+/* custom cursor dot */
+body::after{
+  content:'';
+  position:fixed;width:8px;height:8px;
+  background:var(--neon);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  top:var(--cy,50%);left:var(--cx,50%);
+  transition:width 0.1s,height 0.1s;
+}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--neon)}
+
+/* ─── SCANLINE overlay ─── */
+body::before{
+  content:'';
+  position:fixed;inset:0;z-index:1000;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px
+  );
+}
+
+/* ─── NAV ─── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 2.5rem;
+  border-bottom:1px solid transparent;
+  transition:all 0.3s;
+}
+nav.scrolled{
+  background:rgba(8,8,8,0.95);
+  backdrop-filter:blur(8px);
+  border-bottom-color:var(--border);
+}
+.nav-logo{
+  font-family:var(--ff-h);
+  font-size:2.2rem;letter-spacing:0.12em;
+  color:var(--neon);text-decoration:none;
+  text-shadow:0 0 20px rgba(232,255,0,0.5);
+  line-height:1;
+}
+.nav-logo sup{
+  font-family:var(--ff-jp);font-size:0.5rem;font-weight:300;
+  color:var(--pink);letter-spacing:0.05em;vertical-align:super;
+  text-shadow:none;
+}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;
+  transition:color 0.2s;
+  position:relative;
+}
+.nav-links a:hover{color:var(--neon)}
+.nav-open{
+  font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.5rem 1.2rem;
+  background:transparent;color:var(--neon);
+  border:1px solid var(--neon);
+  cursor:crosshair;
+  transition:all 0.2s;
+  font-family:var(--ff-b);
+}
+.nav-open:hover{background:var(--neon);color:var(--black)}
+
+/* ─── HERO ─── */
+.hero{
+  min-height:100vh;
+  display:grid;
+  grid-template-rows:1fr auto;
+  position:relative;overflow:hidden;
+  padding-top:5rem;
+}
+/* grid lines background */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(232,255,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,255,0,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+/* neon glow blobs */
+.blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.blob-1{width:500px;height:500px;background:rgba(232,255,0,0.06);top:-100px;left:-100px}
+.blob-2{width:400px;height:400px;background:rgba(255,45,120,0.08);bottom:0;right:-80px}
+.blob-3{width:300px;height:300px;background:rgba(0,245,255,0.05);top:50%;left:60%}
+
+.hero-main{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:0;
+  align-items:end;
+  padding:4rem 2.5rem 2.5rem;
+  position:relative;z-index:2;
+}
+.hero-left{}
+.hero-kicker{
+  font-family:var(--ff-jp);font-size:0.75rem;font-weight:300;
+  color:var(--pink);letter-spacing:0.15em;
+  margin-bottom:1rem;
+  display:flex;align-items:center;gap:0.7rem;
+  opacity:0;animation:fadeUp 0.7s 0.2s forwards;
+}
+.kicker-line{width:28px;height:1px;background:var(--pink)}
+.hero-kanji{
+  font-family:var(--ff-jp);font-weight:700;
+  font-size:clamp(5rem,14vw,14rem);
+  color:transparent;
+  -webkit-text-stroke:1px rgba(232,255,0,0.15);
+  line-height:0.85;
+  position:absolute;top:5rem;right:2.5rem;
+  pointer-events:none;z-index:1;
+  opacity:0;animation:fadeIn 1.2s 0.5s forwards;
+  letter-spacing:-0.05em;
+}
+.hero-title{
+  font-family:var(--ff-h);
+  font-size:clamp(5rem,14vw,17rem);
+  line-height:0.85;letter-spacing:0.03em;
+  color:var(--white);
+  opacity:0;animation:fadeUp 0.8s 0.35s forwards;
+  position:relative;z-index:2;
+}
+.hero-title .neon-word{
+  color:var(--neon);
+  text-shadow:0 0 30px rgba(232,255,0,0.4), 0 0 80px rgba(232,255,0,0.15);
+  animation: flicker 8s 2s infinite;
+}
+.hero-title .pink-word{color:var(--pink);text-shadow:0 0 30px rgba(255,45,120,0.4)}
+.hero-sub-block{
+  margin-top:2rem;
+  max-width:420px;
+  opacity:0;animation:fadeUp 0.8s 0.6s forwards;
+  position:relative;z-index:2;
+}
+.hero-sub{
+  font-size:0.85rem;font-weight:400;
+  color:var(--muted);line-height:1.8;
+}
+.hero-ctas{
+  display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;
+}
+.btn-neon{
+  font-family:var(--ff-b);font-size:0.72rem;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.85rem 2.2rem;
+  background:var(--neon);color:var(--black);
+  border:none;cursor:crosshair;
+  transition:all 0.2s;
+  text-decoration:none;display:inline-block;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
+}
+.btn-neon:hover{
+  background:var(--black);color:var(--neon);
+  box-shadow:0 0 0 1px var(--neon), 0 0 20px rgba(232,255,0,0.2);
+  clip-path:none;
+}
+.btn-ghost-neon{
+  font-family:var(--ff-b);font-size:0.72rem;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.85rem 2.2rem;
+  background:transparent;color:var(--white);
+  border:1px solid var(--border);
+  cursor:crosshair;
+  transition:all 0.2s;
+  text-decoration:none;display:inline-block;
+}
+.btn-ghost-neon:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 16px rgba(0,245,255,0.1)}
+
+/* right stats stack */
+.hero-stats{
+  display:flex;flex-direction:column;gap:0;
+  border:1px solid var(--border);
+  opacity:0;animation:fadeIn 0.8s 0.9s forwards;
+  position:relative;z-index:2;
+  align-self:end;
+}
+.stat-box{
+  padding:1.2rem 2rem;
+  border-bottom:1px solid var(--border);
+  text-align:center;
+  transition:background 0.3s;
+}
+.stat-box:last-child{border-bottom:none}
+.stat-box:hover{background:var(--panel)}
+.stat-num{font-family:var(--ff-h);font-size:2.2rem;letter-spacing:0.05em;color:var(--neon);line-height:1;text-shadow:0 0 12px rgba(232,255,0,0.3)}
+.stat-lbl{font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* bottom strip */
+.hero-strip{
+  background:var(--neon);
+  padding:0.7rem 2.5rem;
+  display:flex;align-items:center;gap:2rem;
+  position:relative;z-index:2;
+  overflow:hidden;
+}
+.strip-text{
+  font-family:var(--ff-h);font-size:1.1rem;letter-spacing:0.12em;
+  color:var(--black);white-space:nowrap;
+  animation:marquee 18s linear infinite;
+}
+.strip-dot{width:6px;height:6px;border-radius:50%;background:var(--black);opacity:0.3;flex-shrink:0}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ─── HOURS BANNER ─── */
+.hours-bar{
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  display:flex;overflow:hidden;
+}
+.hb-cell{
+  flex:1;padding:1.4rem 2rem;
+  border-right:1px solid var(--border);
+  display:flex;align-items:center;gap:1rem;
+  transition:background 0.3s;
+}
+.hb-cell:last-child{border-right:none}
+.hb-cell:hover{background:var(--off)}
+.hb-day{font-family:var(--ff-h);font-size:1.1rem;letter-spacing:0.08em;color:var(--white)}
+.hb-time{font-size:0.72rem;color:var(--muted)}
+.hb-dot{width:7px;height:7px;border-radius:50%;background:var(--neon);flex-shrink:0;box-shadow:0 0 8px var(--neon)}
+.hb-dot.closed{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+
+/* ─── MENU ─── */
+.menu-sec{padding:6rem 2.5rem;background:var(--black)}
+.menu-top{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:3rem;
+  padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+}
+.sec-eyebrow{
+  font-size:0.62rem;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--pink);margin-bottom:0.6rem;
+  display:flex;align-items:center;gap:0.6rem;
+}
+.sec-eyebrow::before{content:'//';opacity:0.5}
+.sec-h{
+  font-family:var(--ff-h);
+  font-size:clamp(3rem,6vw,6rem);
+  letter-spacing:0.04em;line-height:0.9;
+  color:var(--white);
+}
+.sec-h span{color:var(--neon)}
+/* menu tabs */
+.mtabs{display:flex;gap:0;border:1px solid var(--border)}
+.mt{
+  font-family:var(--ff-b);font-size:0.68rem;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.7rem 1.5rem;background:transparent;
+  color:var(--muted);border:none;border-right:1px solid var(--border);
+  cursor:crosshair;transition:all 0.2s;
+}
+.mt:last-child{border-right:none}
+.mt.a,.mt:hover{background:var(--neon);color:var(--black)}
+
+/* bento menu grid */
+.menu-bento{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  grid-template-rows:auto;
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+}
+.mc{
+  background:var(--off);
+  padding:2rem;
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+  cursor:crosshair;
+}
+.mc:hover{background:var(--panel)}
+/* number watermark */
+.mc::after{
+  content:attr(data-n);
+  position:absolute;bottom:-0.5rem;right:0.5rem;
+  font-family:var(--ff-h);font-size:5rem;
+  color:rgba(255,255,255,0.03);line-height:1;
+  pointer-events:none;
+}
+.mc:hover::after{color:rgba(232,255,0,0.05)}
+/* spans */
+.mc.wide{grid-column:span 3}
+.mc.wide2{grid-column:span 2}
+.mc.full{grid-column:1/-1}
+
+.mc-tag{
+  font-size:0.55rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--pink);margin-bottom:0.8rem;
+  display:flex;align-items:center;gap:0.4rem;
+}
+.mc-tag::before{content:'';width:12px;height:1px;background:var(--pink)}
+.mc-name{
+  font-family:var(--ff-h);font-size:1.5rem;letter-spacing:0.05em;
+  color:var(--white);line-height:1.1;margin-bottom:0.6rem;
+}
+.mc-name em{color:var(--neon);font-style:normal}
+.mc-desc{font-size:0.75rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem}
+.mc-bottom{display:flex;justify-content:space-between;align-items:center}
+.mc-price{
+  font-family:var(--ff-h);font-size:1.4rem;letter-spacing:0.05em;
+  color:var(--neon);text-shadow:0 0 12px rgba(232,255,0,0.25);
+}
+.mc-spice{display:flex;gap:2px}
+.spice{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.spice.on{background:var(--pink);box-shadow:0 0 6px var(--pink)}
+
+/* featured card */
+.mc.featured{
+  background:linear-gradient(135deg,#1a1a00,#0d0d0d);
+  border:1px solid rgba(232,255,0,0.15);
+  position:relative;
+}
+.mc.featured::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 60% at 30% 40%,rgba(232,255,0,0.05),transparent);
+}
+.mc.featured .mc-name{font-size:2.2rem}
+.mc.featured .mc-desc{max-width:420px}
+.featured-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:var(--neon);color:var(--black);
+  font-size:0.58rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;
+  padding:0.3rem 0.8rem;margin-bottom:1rem;
+}
+
+/* ─── VIBE SECTION ─── */
+.vibe{
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:6rem 2.5rem;
+  position:relative;overflow:hidden;
+}
+.vibe::before{
+  content:'夜';
+  position:absolute;right:-2rem;top:50%;transform:translateY(-50%);
+  font-family:var(--ff-jp);font-weight:700;
+  font-size:26rem;color:rgba(232,255,0,0.02);
+  line-height:1;pointer-events:none;
+}
+.vibe-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;align-items:center;
+}
+.vibe-left .sec-h{margin:0.6rem 0 1.4rem}
+.vibe-left p{font-size:0.88rem;color:var(--muted);line-height:1.9;max-width:440px}
+.vibe-left p+p{margin-top:1rem}
+.vibe-pills{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:2rem}
+.pill{
+  font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  padding:0.45rem 1rem;
+  border:1px solid var(--border);color:var(--muted);
+  transition:all 0.2s;cursor:crosshair;
+}
+.pill:hover{border-color:var(--neon);color:var(--neon);box-shadow:0 0 10px rgba(232,255,0,0.1)}
+.vibe-right{display:flex;flex-direction:column;gap:1px}
+.vibe-card{
+  background:var(--off);
+  padding:1.6rem 2rem;
+  border:1px solid var(--border);
+  display:flex;align-items:center;gap:1.5rem;
+  transition:all 0.25s;cursor:crosshair;
+  position:relative;overflow:hidden;
+}
+.vibe-card:hover{border-color:var(--neon);background:var(--black)}
+.vibe-card:hover .vc-num{color:var(--neon);text-shadow:0 0 12px rgba(232,255,0,0.4)}
+.vc-num{font-family:var(--ff-h);font-size:2.4rem;letter-spacing:0.05em;color:var(--border);transition:all 0.3s;flex-shrink:0}
+.vc-text{}
+.vc-title{font-family:var(--ff-b);font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:0.3rem}
+.vc-desc{font-size:0.75rem;color:var(--muted);line-height:1.7}
+.vc-arrow{
+  margin-left:auto;font-size:1rem;color:var(--border);flex-shrink:0;
+  transition:color 0.25s,transform 0.25s;
+}
+.vibe-card:hover .vc-arrow{color:var(--neon);transform:translateX(4px)}
+
+/* ─── SPECIALS TICKER ─── */
+.neo-ticker{
+  background:var(--pink);
+  padding:0.65rem 0;overflow:hidden;
+  white-space:nowrap;
+}
+.nt-inner{
+  display:inline-flex;gap:0;
+  animation:marquee 14s linear infinite reverse;
+}
+.nt-item{
+  font-family:var(--ff-h);font-size:1rem;letter-spacing:0.1em;
+  color:rgba(255,255,255,0.85);
+  padding:0 2rem;
+  display:inline-flex;align-items:center;gap:2rem;
+}
+.nt-item::after{content:'★';color:rgba(255,255,255,0.3);font-size:0.6rem}
+
+/* ─── ORDER / RESERVE ─── */
+.order-sec{
+  padding:6rem 2.5rem;
+  background:var(--black);
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:3rem;
+}
+.order-panel{
+  border:1px solid var(--border);
+  padding:3rem;
+  position:relative;
+  background:var(--off);
+  transition:border-color 0.3s;
+}
+.order-panel:hover{border-color:var(--neon)}
+.op-label{
+  position:absolute;top:-0.75rem;left:1.5rem;
+  font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  background:var(--neon);color:var(--black);
+  padding:0.2rem 0.7rem;
+}
+.op-label.pink{background:var(--pink);color:#fff}
+.op-h{
+  font-family:var(--ff-h);font-size:2.4rem;letter-spacing:0.05em;
+  color:var(--white);line-height:1;margin:0.8rem 0;
+}
+.op-h span{color:var(--neon)}
+.op-h .p{color:var(--pink)}
+.op-sub{font-size:0.8rem;color:var(--muted);line-height:1.8;margin-bottom:2rem}
+
+/* form */
+.nform{display:flex;flex-direction:column;gap:0.7rem}
+.nff{position:relative}
+.nff label{
+  display:block;font-size:0.58rem;font-weight:700;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:0.35rem;
+}
+.nff input,.nff select{
+  width:100%;padding:0.75rem 1rem;
+  background:var(--black);
+  border:1px solid var(--border);
+  color:var(--white);
+  font-family:var(--ff-b);font-size:0.84rem;font-weight:400;
+  outline:none;-webkit-appearance:none;
+  transition:border-color 0.2s;
+}
+.nff input::placeholder{color:#333}
+.nff select option{background:var(--black)}
+.nff input:focus,.nff select:focus{border-color:var(--neon)}
+.nform-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem}
+.nform-btn{
+  font-family:var(--ff-b);font-size:0.72rem;font-weight:700;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.95rem;background:var(--neon);color:var(--black);
+  border:none;cursor:crosshair;
+  margin-top:0.3rem;
+  transition:all 0.2s;
+  clip-path:polygon(0 0,calc(100%-12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100%-12px));
+}
+.nform-btn:hover{background:var(--white)}
+.nform-btn.pink-btn{background:var(--pink);color:#fff;clip-path:none}
+.nform-btn.pink-btn:hover{background:#ff5596}
+
+/* info list */
+.info-list{margin-top:1rem;display:flex;flex-direction:column;gap:0;border-top:1px solid var(--border)}
+.il-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.9rem 0;border-bottom:1px solid var(--border);
+}
+.il-l{font-size:0.72rem;color:var(--muted)}
+.il-r{font-size:0.78rem;font-weight:700;color:var(--white)}
+.il-r.neon{color:var(--neon)}
+
+/* ─── FOOTER ─── */
+footer{
+  background:var(--panel);
+  border-top:1px solid var(--border);
+  padding:4rem 2.5rem 2.5rem;
+}
+.footer-top{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1.2fr;
+  gap:3.5rem;
+  padding-bottom:3rem;
+  border-bottom:1px solid var(--border);
+  margin-bottom:2rem;
+}
+.footer-logo{
+  font-family:var(--ff-h);font-size:3rem;letter-spacing:0.1em;
+  color:var(--neon);line-height:1;
+  text-shadow:0 0 30px rgba(232,255,0,0.3);
+}
+.footer-logo sub{
+  font-family:var(--ff-jp);font-weight:300;font-size:0.3em;
+  color:var(--muted);vertical-align:baseline;letter-spacing:0.2em;
+}
+.footer-brand p{font-size:0.78rem;color:var(--muted);line-height:1.8;margin:1rem 0 1.5rem;max-width:220px}
+.social-strip{display:flex;gap:0.5rem}
+.ss-btn{
+  width:34px;height:34px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:crosshair;transition:all 0.2s;
+}
+.ss-btn:hover{border-color:var(--neon);background:rgba(232,255,0,0.08)}
+.ss-btn svg{width:13px;height:13px}
+.fcol h4{
+  font-size:0.58rem;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--neon);margin-bottom:1.2rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.fcol h4::before{content:'//';color:rgba(232,255,0,0.3);font-size:0.8em}
+.fcol ul{list-style:none}
+.fcol ul li{
+  font-size:0.78rem;color:var(--muted);
+  margin-bottom:0.5rem;cursor:crosshair;
+  transition:color 0.2s;padding-left:0.8rem;
+  position:relative;
+}
+.fcol ul li::before{content:'›';position:absolute;left:0;color:var(--border);transition:color 0.2s}
+.fcol ul li:hover{color:var(--white)}
+.fcol ul li:hover::before{color:var(--neon)}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-bottom p{font-size:0.68rem;color:#333}
+.footer-bottom .jp{
+  font-family:var(--ff-jp);font-weight:300;
+  font-size:0.75rem;color:#222;letter-spacing:0.1em;
+}
+
+/* ─── REVEAL ─── */
+.r{opacity:0;transform:translateY(24px);transition:opacity 0.75s,transform 0.75s}
+.r.v{opacity:1;transform:none}
+.d1{transition-delay:0.1s}.d2{transition-delay:0.2s}.d3{transition-delay:0.3s}.d4{transition-delay:0.45s}
+
+/* ─── KEYFRAMES ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes flicker{
+  0%,96%,98%,100%{opacity:1;text-shadow:0 0 30px rgba(232,255,0,0.4),0 0 80px rgba(232,255,0,0.15)}
+  97%,99%{opacity:0.4;text-shadow:none}
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:960px){
+  .nav-links{display:none}
+  nav{padding:1rem 1.5rem}
+  .hero-main{grid-template-columns:1fr;gap:2rem;padding:2rem 1.5rem 1.5rem}
+  .hero-stats{flex-direction:row;flex-wrap:wrap}
+  .stat-box{border-bottom:none;border-right:1px solid var(--border);flex:1}
+  .hero-kanji{display:none}
+  .hours-bar{flex-wrap:wrap}
+  .hb-cell{flex:1 1 45%;border-bottom:1px solid var(--border)}
+  .menu-bento{grid-template-columns:1fr 1fr}
+  .mc.wide,.mc.wide2{grid-column:span 2}
+  .mc.full{grid-column:1/-1}
+  .vibe-grid,.order-sec{grid-template-columns:1fr;gap:2rem}
+  .footer-top{grid-template-columns:1fr 1fr;gap:2rem}
+  section,.menu-sec,.vibe,.order-sec{padding:4rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">YORU<sup>夜</sup></a>
+  <ul class="nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#vibe">The Vibe</a></li>
+    <li><a href="#order">Order</a></li>
+    <li><a href="#reserve">Reserve</a></li>
+  </ul>
+  <button class="nav-open">Open 'til 3AM</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="hero-kanji">夜</div>
+
+  <div class="hero-main">
+    <div class="hero-left">
+      <div class="hero-kicker"><div class="kicker-line"></div> Late-Night Ramen · BGC, Manila</div>
+      <h1 class="hero-title">
+        EAT<br>
+        <span class="neon-word">LOUD.</span><br>
+        <span class="pink-word">STAY</span><br>
+        LATE.
+      </h1>
+      <div class="hero-sub-block">
+        <p class="hero-sub">Tokyo-style ramen bar that opens when the rest of the city closes. No reservations needed. No dress code. Just bowls that hit different at 1AM.</p>
+        <div class="hero-ctas">
+          <a href="#menu" class="btn-neon">See the Menu</a>
+          <a href="#order" class="btn-ghost-neon">Order Online</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-box">
+        <div class="stat-num">3AM</div>
+        <div class="stat-lbl">Last Order</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">72H</div>
+        <div class="stat-lbl">Tonkotsu Broth</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">8★</div>
+        <div class="stat-lbl">Spice Levels</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom strip marquee -->
+  <div class="hero-strip">
+    <div class="strip-text" id="strip"></div>
+  </div>
+</section>
+
+<!-- HOURS BAR -->
+<div class="hours-bar">
+  <div class="hb-cell"><div class="hb-dot"></div><div><div class="hb-day">MON – THU</div><div class="hb-time">6PM – 2AM</div></div></div>
+  <div class="hb-cell"><div class="hb-dot"></div><div><div class="hb-day">FRIDAY</div><div class="hb-time">6PM – 3AM</div></div></div>
+  <div class="hb-cell"><div class="hb-dot"></div><div><div class="hb-day">SATURDAY</div><div class="hb-time">4PM – 4AM</div></div></div>
+  <div class="hb-cell"><div class="hb-dot"></div><div><div class="hb-day">SUNDAY</div><div class="hb-time">4PM – 1AM</div></div></div>
+  <div class="hb-cell" style="flex:0.6"><div class="hb-dot closed"></div><div><div class="hb-day" style="color:#555">WALK-IN</div><div class="hb-time">No reservations</div></div></div>
+</div>
+
+<!-- MENU -->
+<section class="menu-sec" id="menu">
+  <div class="menu-top">
+    <div>
+      <div class="sec-eyebrow r">What We Serve</div>
+      <h2 class="sec-h r d1">THE <span>MENU</span></h2>
+    </div>
+    <div class="mtabs r">
+      <button class="mt a" onclick="setTab(this,'ramen')">Ramen</button>
+      <button class="mt" onclick="setTab(this,'sides')">Sides</button>
+      <button class="mt" onclick="setTab(this,'drinks')">Drinks</button>
+      <button class="mt" onclick="setTab(this,'shots')">Shots</button>
+    </div>
+  </div>
+
+  <!-- bento grid -->
+  <div class="menu-bento r" id="mbento">
+    <!-- Featured -->
+    <div class="mc wide featured" data-n="01">
+      <div class="featured-badge">⚡ House Special</div>
+      <div class="mc-tag">Signature Ramen</div>
+      <div class="mc-name">YORU <em>TONKOTSU</em></div>
+      <div class="mc-desc">72-hour pork bone broth, chashu belly, soft-boiled soy egg, black garlic oil, nori, menma, and spring onion. The bowl this place was built around.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱550</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice on"></div><div class="spice on"></div><div class="spice"></div><div class="spice"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc wide2" data-n="02">
+      <div class="mc-tag">Spicy Ramen</div>
+      <div class="mc-name">DEVIL'S <em>MISO</em></div>
+      <div class="mc-desc">Red miso broth, ghost pepper oil, ground pork, corn, butter, wood ear mushroom. Level 5 heat.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱520</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice on"></div><div class="spice on"></div><div class="spice on"></div><div class="spice on"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" data-n="03">
+      <div class="mc-tag">Shoyu</div>
+      <div class="mc-name">TOKYO <em>SOY</em></div>
+      <div class="mc-desc">Classic clear chicken-soy broth, chicken chashu, narutomaki, menma, nori.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱480</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice"></div><div class="spice"></div><div class="spice"></div><div class="spice"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" data-n="04">
+      <div class="mc-tag">Vegan</div>
+      <div class="mc-name">SHIRO <em>SHIO</em></div>
+      <div class="mc-desc">Kombu-shiitake salt broth, roasted tofu, seasonal veg, yuzu kosho, sesame oil.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱450</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice"></div><div class="spice"></div><div class="spice"></div><div class="spice"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" data-n="05">
+      <div class="mc-tag">Late Night Special</div>
+      <div class="mc-name">MIDNIGHT <em>BLACK</em></div>
+      <div class="mc-desc">Squid ink tonkotsu, cuttlefish chashu, pink pickled ginger, charred scallion. Only after 12AM.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱620</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice on"></div><div class="spice"></div><div class="spice"></div><div class="spice"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" data-n="06">
+      <div class="mc-tag">Collaboration</div>
+      <div class="mc-name">SINIGANG <em>RAMEN</em></div>
+      <div class="mc-desc">Tamarind-laced pork broth, chashu liempo, kangkong, radish. Filipino soul, Japanese spirit.</div>
+      <div class="mc-bottom">
+        <div class="mc-price">₱560</div>
+        <div class="mc-spice">
+          <div class="spice on"></div><div class="spice on"></div><div class="spice on"></div><div class="spice"></div><div class="spice"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PINK TICKER -->
+<div class="neo-ticker">
+  <div class="nt-inner" id="nt"></div>
+</div>
+
+<!-- VIBE -->
+<section class="vibe" id="vibe">
+  <div class="vibe-grid">
+    <div class="vibe-left">
+      <div class="sec-eyebrow r">Why People Come Back</div>
+      <h2 class="sec-h r d1">THE <span style="color:var(--neon)">YORU</span><br>DIFFERENCE</h2>
+      <p class="r d2">YORU was born out of frustration. Manila had great restaurants — but nothing for the people who worked late, played late, or just couldn't sleep. We opened so the city's night shift finally had somewhere to go.</p>
+      <p class="r d3">The broth takes 72 hours. The noodles are flown in from Fukuoka twice a week. The playlist is always too loud. That's the point.</p>
+      <div class="vibe-pills r d4">
+        <span class="pill">No Dress Code</span>
+        <span class="pill">Walk-ins Welcome</span>
+        <span class="pill">Loud Music</span>
+        <span class="pill">Cash & GCash</span>
+        <span class="pill">Dog Friendly</span>
+        <span class="pill">Halal Options</span>
+      </div>
+    </div>
+    <div class="vibe-right r d1">
+      <div class="vibe-card">
+        <div class="vc-num">01</div>
+        <div class="vc-text">
+          <div class="vc-title">72-Hour Broth</div>
+          <div class="vc-desc">We simmer our tonkotsu from 9AM Monday to 9AM Thursday. No shortcuts, no powder packets.</div>
+        </div>
+        <div class="vc-arrow">→</div>
+      </div>
+      <div class="vibe-card">
+        <div class="vc-num">02</div>
+        <div class="vc-text">
+          <div class="vc-title">Imported Noodles</div>
+          <div class="vc-desc">Straight-cut hakata noodles from Fukuoka. Wavy noodles from Sapporo. Never substituted.</div>
+        </div>
+        <div class="vc-arrow">→</div>
+      </div>
+      <div class="vibe-card">
+        <div class="vc-num">03</div>
+        <div class="vc-text">
+          <div class="vc-title">Open 'til 4AM Fri–Sat</div>
+          <div class="vc-desc">Because the best conversations happen at 2AM over a bowl of ramen. We'll be here.</div>
+        </div>
+        <div class="vc-arrow">→</div>
+      </div>
+      <div class="vibe-card">
+        <div class="vc-num">04</div>
+        <div class="vc-text">
+          <div class="vc-title">8 Spice Levels</div>
+          <div class="vc-desc">From "Just Warming Up" (1) to "Call Your Doctor" (8). We sign a waiver for anything above 6.</div>
+        </div>
+        <div class="vc-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER & RESERVE -->
+<section class="order-sec" id="order">
+  <!-- Order online panel -->
+  <div class="order-panel r">
+    <div class="op-label">⚡ Order Online</div>
+    <div class="op-h"><span>DELIVERY</span> &<br>TAKEOUT</div>
+    <p class="op-sub">Order straight from us. No Foodpanda markup. Delivery in BGC, Makati, and Pasig. Pickup ready in 20 mins.</p>
+    <div class="info-list">
+      <div class="il-item"><div class="il-l">Delivery Radius</div><div class="il-r neon">BGC · Makati · Pasig</div></div>
+      <div class="il-item"><div class="il-l">Prep Time</div><div class="il-r">20–30 minutes</div></div>
+      <div class="il-item"><div class="il-l">Min. Order</div><div class="il-r">₱350</div></div>
+      <div class="il-item"><div class="il-l">Delivery Fee</div><div class="il-r">₱50–120</div></div>
+      <div class="il-item"><div class="il-l">Payment</div><div class="il-r">Cash · GCash · Card</div></div>
+    </div>
+    <button class="nform-btn pink-btn" style="width:100%;margin-top:1.5rem">Start Your Order →</button>
+  </div>
+
+  <!-- Reserve panel -->
+  <div class="order-panel r d1" id="reserve">
+    <div class="op-label pink">Reserve a Spot</div>
+    <div class="op-h">SAVE <span class="p">YOUR</span><br>SEAT</div>
+    <p class="op-sub">No reservations required — but for groups of 4+, lock in your spot so we save the table. We're small and fill up fast on weekends.</p>
+    <div class="nform">
+      <div class="nform-row">
+        <div class="nff"><label>Name</label><input type="text" placeholder="Your name"/></div>
+        <div class="nff"><label>Phone / Viber</label><input type="text" placeholder="+63 9xx"/></div>
+      </div>
+      <div class="nform-row">
+        <div class="nff"><label>Date</label><input type="date"/></div>
+        <div class="nff"><label>Arrival Time</label>
+          <select>
+            <option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option>
+            <option>9:00 PM</option><option>10:00 PM</option>
+            <option>11:00 PM</option><option>12:00 AM</option>
+            <option>1:00 AM</option><option>2:00 AM</option>
+          </select>
+        </div>
+      </div>
+      <div class="nff"><label>Party Size</label>
+        <select>
+          <option>2 people</option><option>3 people</option>
+          <option>4 people</option><option>5–6 people</option>
+          <option>7–10 people (group booking)</option>
+        </select>
+      </div>
+      <div class="nff"><label>Anything to note?</label><input type="text" placeholder="Allergies, birthday, extra loud playlist..."/></div>
+      <button class="nform-btn">Lock My Table ⚡</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">YORU<sub>夜</sub></div>
+      <p>Manila's late-night ramen bar. Open when everything else closes. Built for the night shift, the night owls, and everyone in between.</p>
+      <div class="social-strip">
+        <div class="ss-btn"><svg fill="none" stroke="#e8ff00" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#e8ff00" stroke="none"/></svg></div>
+        <div class="ss-btn"><svg fill="none" stroke="#e8ff00" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 2H3l7.5 8.5L3 22h18l-7.5-8.5z"/></svg></div>
+        <div class="ss-btn"><svg fill="none" stroke="#e8ff00" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg></div>
+      </div>
+    </div>
+    <div class="fcol">
+      <h4>Menu</h4>
+      <ul>
+        <li>Signature Ramen</li><li>Spicy Bowls</li><li>Sides & Gyoza</li>
+        <li>Beers & Highballs</li><li>Shots Menu</li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <h4>Info</h4>
+      <ul>
+        <li>About YORU</li><li>Our Suppliers</li><li>Catering / Events</li>
+        <li>Franchise Inquiry</li><li>Jobs</li><li>Press</li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <h4>Find Us</h4>
+      <ul>
+        <li>12 Finance Drive, BGC</li>
+        <li>Taguig, Metro Manila</li>
+        <li style="margin-top:0.6rem;color:var(--neon)">+63 917 YORU PH</li>
+        <li>order@yoruramen.ph</li>
+        <li style="margin-top:0.8rem;color:var(--muted)">Parking: SM Aura P3</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 YORU Ramen Bar · Manila · All rights reserved</p>
+    <p class="jp">夜食は最高だ — Late-night food is the best</p>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60));
+
+// Cursor
+document.addEventListener('mousemove',e=>{
+  document.documentElement.style.setProperty('--cx',e.clientX+'px');
+  document.documentElement.style.setProperty('--cy',e.clientY+'px');
+});
+
+// Strip marquee
+const words=['72-Hour Tonkotsu','Open Late','No Dress Code','Walk-Ins Welcome','Devil Miso','Fukuoka Noodles','Tokyo Style','Manila Soul','Eat Loud','Stay Late'];
+const s=document.getElementById('strip');
+const txt=words.map(w=>`<span style="padding:0 2.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:#080808;">${w} <span style="opacity:0.3;font-size:0.7rem">◆</span></span>`).join('');
+s.innerHTML=txt+txt;
+
+// Pink ticker
+const pt=['No MSG · No Shortcuts','Fukuoka noodles twice a week','Open Fridays until 4AM','Squid ink ramen · midnight only','Level 8 spice · sign a waiver','Sinigang Ramen is back','Free kaedama with every bowl'];
+const nt=document.getElementById('nt');
+nt.innerHTML=pt.map(i=>`<span class="nt-item">${i}</span>`).join('')+pt.map(i=>`<span class="nt-item">${i}</span>`).join('');
+
+// Reveal
+const rs=document.querySelectorAll('.r');
+const ob=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('v');ob.unobserve(x.target)}}),{threshold:0.1});
+rs.forEach(el=>ob.observe(el));
+
+// Menu tabs
+const menus={
+  ramen:[
+    {n:'01',span:'wide featured',tag:'Signature Ramen',name:'YORU',em:'TONKOTSU',desc:'72-hour pork bone broth, chashu belly, soft-boiled soy egg, black garlic oil, nori, menma. The bowl this place was built around.',price:'₱550',heat:3,badge:true},
+    {n:'02',span:'wide2',tag:'Spicy Ramen',name:"DEVIL'S",em:'MISO',desc:'Red miso broth, ghost pepper oil, ground pork, corn, butter, wood ear mushroom. Level 5 heat.',price:'₱520',heat:5},
+    {n:'03',span:'',tag:'Shoyu',name:'TOKYO',em:'SOY',desc:'Clear chicken-soy broth, chicken chashu, narutomaki, menma, nori.',price:'₱480',heat:1},
+    {n:'04',span:'',tag:'Vegan',name:'SHIRO',em:'SHIO',desc:'Kombu-shiitake salt broth, roasted tofu, seasonal veg, yuzu kosho.',price:'₱450',heat:1},
+    {n:'05',span:'',tag:'Late Night Special',name:'MIDNIGHT',em:'BLACK',desc:'Squid ink tonkotsu, cuttlefish chashu, pink pickled ginger. Only after 12AM.',price:'₱620',heat:2},
+    {n:'06',span:'',tag:'Collaboration',name:'SINIGANG',em:'RAMEN',desc:'Tamarind-laced pork broth, chashu liempo, kangkong, radish. Filipino soul, Japanese spirit.',price:'₱560',heat:3},
+  ],
+  sides:[
+    {n:'01',span:'wide',tag:'Gyoza',name:'PORK',em:'GYOZA',desc:'Pan-fried pork and cabbage dumplings, yuzu ponzu, chili oil. 6 pieces per order.',price:'₱250',heat:1},
+    {n:'02',span:'',tag:'Karaage',name:'CHICKEN',em:'KARA',desc:'Double-fried Batangas chicken thigh, kewpie mayo, lemon wedge.',price:'₱280',heat:0},
+    {n:'03',span:'',tag:'Bao',name:'CHASHU',em:'BAO',desc:'Steamed bao, braised pork belly, pickled daikon, spring onion.',price:'₱180',heat:1},
+    {n:'04',span:'',tag:'Add-on',name:'EXTRA',em:'CHASHU',desc:'2 additional slices of braised pork belly for your bowl.',price:'₱120',heat:0},
+    {n:'05',span:'',tag:'Add-on',name:'SOFT',em:'TAMAGO',desc:'Perfectly soft-boiled soy-marinated egg. One extra egg.',price:'₱80',heat:0},
+    {n:'06',span:'',tag:'Side',name:'GARLIC',em:'RICE',desc:'Sinangag-style garlic fried rice. Pairs shockingly well with tonkotsu.',price:'₱150',heat:0},
+  ],
+  drinks:[
+    {n:'01',span:'wide',tag:'Highball',name:'SUNTORY',em:'TOKI',desc:'Japanese whisky highball with Suntory Toki, soda water, lemon peel. The classic YORU drink.',price:'₱380',heat:0},
+    {n:'02',span:'',tag:'Beer',name:'SAPPORO',em:'DRAFT',desc:'Classic Japanese lager on draft. 400ml pour, ice-cold.',price:'₱220',heat:0},
+    {n:'03',span:'',tag:'Cocktail',name:'YUZU',em:'SOUR',desc:'Yuzu juice, umeshu, egg white, angostura. Silky and sharp.',price:'₱320',heat:0},
+    {n:'04',span:'',tag:'Non-Alc',name:'CALAMANSI',em:'RAMUNE',desc:'Local calamansi juice, sparkling water, shiso syrup, salted rim.',price:'₱180',heat:0},
+    {n:'05',span:'',tag:'Hot',name:'HOJICHA',em:'LATTE',desc:'Roasted green tea, oat milk, light sweetness. Calm before the storm.',price:'₱160',heat:0},
+    {n:'06',span:'',tag:'Cold Brew',name:'COLD',em:'MATCHA',desc:'Stone-ground Uji matcha, oat milk, vanilla. Served over ice.',price:'₱170',heat:0},
+  ],
+  shots:[
+    {n:'01',span:'wide',tag:'Challenge',name:'HABANERO',em:'RAMEN SHOT',desc:'A shot of our habanero-infused broth. If you finish a full bowl of Level 8, this is on the house.',price:'₱120',heat:8,badge:true},
+    {n:'02',span:'',tag:'Shot',name:'UMESHU',em:'STRAIGHT',desc:'Japanese plum wine, chilled. Sweet, tart, and dangerously drinkable.',price:'₱200',heat:0},
+    {n:'03',span:'',tag:'Shot',name:'SHOCHU',em:'IPPAI',desc:'Classic Japanese barley shochu, room temp. The way locals drink it.',price:'₱180',heat:0},
+    {n:'04',span:'',tag:'Shot',name:'SAKE',em:'JUNMAI',desc:'Pure rice sake, unfiltered, slightly cloudy. Served at 5°C.',price:'₱220',heat:0},
+    {n:'05',span:'',tag:'Bomb',name:'SAKE',em:'BOMB',desc:'Drop a sake cup into a Sapporo glass. Count to three. You know the drill.',price:'₱380',heat:0},
+    {n:'06',span:'',tag:'Non-Alc Shot',name:'GINGER',em:'KAIJU',desc:'House-pressed ginger, yuzu, black pepper. Burns but won\'t regret it.',price:'₱100',heat:4},
+  ],
+};
+function spiceHTML(h){return[1,2,3,4,5].map(i=>`<div class="spice${i<=h?' on':''}"></div>`).join('')}
+function setTab(btn,tab){
+  document.querySelectorAll('.mt').forEach(b=>b.classList.remove('a'));
+  btn.classList.add('a');
+  const g=document.getElementById('mbento');
+  g.style.opacity='0';g.style.transform='translateY(12px)';
+  setTimeout(()=>{
+    g.innerHTML=menus[tab].map(d=>`
+      <div class="mc ${d.span||''}" data-n="${d.n}">
+        ${d.badge?'<div class="featured-badge">⚡ House Special</div>':''}
+        <div class="mc-tag">${d.tag}</div>
+        <div class="mc-name">${d.name} <em>${d.em}</em></div>
+        <div class="mc-desc">${d.desc}</div>
+        <div class="mc-bottom">
+          <div class="mc-price">${d.price}</div>
+          <div class="mc-spice">${spiceHTML(d.heat||0)}</div>
+        </div>
+      </div>
+    `).join('');
+    g.style.transition='opacity 0.4s,transform 0.4s';
+    requestAnimationFrame(()=>{g.style.opacity='1';g.style.transform='none'});
+  },220);
+}
+</script>
+</body>
+</html>
